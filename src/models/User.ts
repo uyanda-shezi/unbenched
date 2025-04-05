@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, mongo } from "mongoose";
-import { unique } from "next/dist/build/utils";
 
 export interface IUser extends Document {
     name: string;
