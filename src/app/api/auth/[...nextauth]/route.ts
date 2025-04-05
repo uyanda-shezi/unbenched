@@ -4,7 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 import connectToDatabase from "@/lib/db";
 import User from "@/models/User";
 import { compare } from "bcryptjs";
-import { pages } from "next/dist/build/templates/app-page";
 
 export const authOptions = {
     providers: [
