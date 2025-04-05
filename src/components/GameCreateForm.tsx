@@ -3,8 +3,28 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
+interface User {
+    id: string;
+}
+
+interface SessionData {
+    user: User | null;
+}
+
+interface GameFormData {
+    title: string;
+    description: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+    dateTime: string;
+    maxPLayers: number;
+    skillLevel: 'beginner' | 'intermediate' | 'advanced';
+    price: number;
+}
+
 const GameCreateForm = () => {
-  const { data: session } = useSession();
+  const { data: session } = useSession() as {data: SessionData | null}
   const router = useRouter();
   const [formData, setFormData] = useState({
     title: '',
@@ -31,6 +51,22 @@ const GameCreateForm = () => {
     if (!session?.user) {
       setError('You must be logged in to create a game');
       return;
+    }
+
+    // Validate coordinates
+    const lat = parseFloat(formData.latitude);
+    const lng = parseFloat(formData.longitude);
+    
+    if (isNaN(lat) || isNaN(lng)) {
+        setError('Invalid coordinates. Please enter valid numbers for latitude and longitude.');
+        return;
+    }
+
+    // Validate date
+    const gameDate = new Date(formData.dateTime);
+    if (isNaN(gameDate.getTime())) {
+        setError('Invalid date format');
+        return;
     }
     
     setIsSubmitting(true);
@@ -63,12 +99,13 @@ const GameCreateForm = () => {
         throw new Error(errorData.error || 'Failed to create game');
       }
       
-      const game = await response.json();
-      router.push(`/games/${game._id}`);
+        const game = await response.json();
+        router.push(`/games/${game._id}`);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+        const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
+        setError(errorMessage);
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
   };
 
