@@ -30,7 +30,7 @@ async function connectToDatabase() {
 
         console.log('[DB] Creating new connection promise'); // Log when creating a new promise
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then( (mongoose) => {
+        cached.promise = mongoose.connect(MONGODB_URI as string, opts).then( (mongoose) => {
             console.log('[DB] MongoDB connection successful'); // Log on successful connection
             return mongoose;
         }).catch(err => {
