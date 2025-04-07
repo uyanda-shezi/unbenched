@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Venue } from '@/types/Venue';
 import { ParamValue } from 'next/dist/server/request/params';
+import { Court } from '@/types/Court';
 
 interface EditVenueFormProps {
     id: ParamValue,
