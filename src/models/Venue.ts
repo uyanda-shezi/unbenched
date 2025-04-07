@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { ICourt } from './Court';
 
 export interface IVenue extends Document {
     name: string;
@@ -11,17 +10,35 @@ export interface IVenue extends Document {
     updatedAt: Date;
 }
 
-const VenueSchema: Schema = new Schema (
+export interface ICourt extends Document {
+    venue: Types.ObjectId | IVenue;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const CourtSchema: Schema = new Schema(
     {
-        name: {type: String, required: true},
-        address: {type: String, required: true},
-        latitude: {type: Number, required: true},
-        longitude: {type: Number, required: true},
-        courts: [{type: Types.ObjectId, ref: 'Court'}],
+        venue: { type: Schema.Types.ObjectId, ref: 'Venue', required: true },
+        name: { type: String, required: true },
     },
-    {timestamps: true}
-)
+    { timestamps: true }
+);
 
-const Venue = mongoose.models.Venue<IVenue> || mongoose.model<IVenue>('Venue', VenueSchema)
+const Court = mongoose.models?.Court || mongoose.model<ICourt>('Court', CourtSchema);
 
+const VenueSchema: Schema = new Schema(
+    {
+        name: { type: String, required: true },
+        address: { type: String, required: true },
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
+        courts: [{ type: Types.ObjectId, ref: 'Court' }],
+    },
+    { timestamps: true }
+);
+
+const Venue = mongoose.models?.Venue || mongoose.model<IVenue>('Venue', VenueSchema);
+
+export { Court, CourtSchema }; // Export Court and CourtSchema if needed elsewhere
 export default Venue;
