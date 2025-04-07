@@ -1,6 +1,4 @@
-import { NumericType } from "mongodb";
 import mongoose, { Schema, Document } from "mongoose";
-import { title } from "process";
 
 //Define interface
 export interface IGame extends Document {
