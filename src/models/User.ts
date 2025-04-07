@@ -1,9 +1,12 @@
-import mongoose, { Schema, Document, mongo } from "mongoose";
+import  mongoose, { Schema, model } from  "mongoose";
 
-export interface IUser extends Document {
+
+export interface IUser {
+    _id: mongoose.Types.ObjectId;
     name: string;
     email: string;
     password:string;
+    role: string;
     image?: string;
     gamesOrganized: mongoose.Types.ObjectId[];
     gamesJoined: mongoose.Types.ObjectId[];
@@ -14,9 +17,21 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema(
     {
-        name: { type: String, required: true },
-        email: { type:String, required: true, unique: true },
+        name: {
+            type: String,
+            required: [true, "Name is required"]
+          },
+        email: {
+            type: String,
+            unique: true,
+            required: [true, "Email is required"],
+            match: [
+              /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+              "Email is invalid",
+            ],
+          },
         password: {type:String, required: true},
+        role: {type:String, default: 'user'},
         image: { type: String},
         gamesOrganized: { type: Schema.Types.ObjectId, ref: 'Game' },
         gamesJoined: { type: Schema.Types.ObjectId, ref: 'Game' },
@@ -29,4 +44,5 @@ const UserSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.models?.User || model<IUser>('User', UserSchema);
+export default User;
