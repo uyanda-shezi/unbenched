@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ManageVenueFormData from "@/components/venue/ManageVenueForm";
+import ManageVenuePageComponent from "@/components/venue/ManageVenue";
 
 export const metadata: Metadata = {
     title: 'Venues',
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const AdminVenuesPage = () => {
-    return (<ManageVenueFormData/>)
+    return (<ManageVenuePageComponent/>)
 }
 
 export default AdminVenuesPage;

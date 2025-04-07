@@ -15,6 +15,49 @@ interface UpdateRequestBody {
     // we'll focus on venue details for now. Court updates could be a separate endpoint.
 }
 
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.role || session.user.role !== 'admin') {
+        return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
+    if(!isValidObjectId(id)){
+        return new NextResponse(JSON.stringify({ message: 'Invalid Venue ID' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    try {
+        
+        await connectToDatabase();
+
+        const venue = await Venue.findById(id).populate('courts', '_id name'); // Populate courts with their IDs and names
+
+        if (!venue) {
+            return new NextResponse(JSON.stringify({ message: 'Venue not found' }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        return NextResponse.json(venue);
+    } catch (error) {
+        console.error('Error fetching venue:', error);
+        return new NextResponse(JSON.stringify({ message: 'Failed to fetch venue' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+}
+
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
     const session = await getServerSession(authOptions);
     const venueId = params.id;

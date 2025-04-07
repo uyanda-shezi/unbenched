@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import AddNewVenueForm from './AddNewVenueForm';
 import { Venue } from '@/types/Venue';
+import Link from 'next/link';
 
-const ManageVenueFormData = () =>{
+const ManageVenuePageComponent = () =>{
     const [venues, setVenues] = useState<Venue[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -64,7 +65,9 @@ const ManageVenueFormData = () =>{
                                 }</p>
                             </div>
                             <div className="space-x-2">
-                                <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-xs">Edit</button>
+                                <Link href={`/admin/venues/${venue._id}/edit`} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-xs">
+                                    Edit
+                                </Link>
                                 <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs">Delete</button>
                             </div>
                         </li>
@@ -83,4 +86,4 @@ const ManageVenueFormData = () =>{
 
 
 
-export default ManageVenueFormData;
+export default ManageVenuePageComponent;

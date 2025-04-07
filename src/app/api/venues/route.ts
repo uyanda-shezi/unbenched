@@ -7,9 +7,7 @@ export async function GET() {
     try {
         await connectToDatabase();
 
-        const venues = await Venue.find().select('-__v').populate({ path: 'courts', select: 'name' }); // Fetch all venues, exclude __v, and optionally populate courts
-
-        console.log();
+        const venues = await Venue.find().select('-__v').populate({ path: 'courts', select: 'name' });
 
         return NextResponse.json(venues);
     } catch (error) {
