@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, mongo } from "mongoose";
 export interface IUser extends Document {
     name: string;
     email: string;
+    password:string;
     image?: string;
     gamesOrganized: mongoose.Types.ObjectId[];
     gamesJoined: mongoose.Types.ObjectId[];
@@ -15,6 +16,7 @@ const UserSchema: Schema = new Schema(
     {
         name: { type: String, required: true },
         email: { type:String, required: true, unique: true },
+        password: {type:String, required: true},
         image: { type: String},
         gamesOrganized: { type: Schema.Types.ObjectId, ref: 'Game' },
         gamesJoined: { type: Schema.Types.ObjectId, ref: 'Game' },

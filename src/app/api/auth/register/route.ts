@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import connectToDatabase from "@/lib/db";
 import User from "@/models/User";
 import { RegistrationFormData, SkillLevel } from "@/types/User";
-import RegistrationForm from "@/components/auth/RegistrationForm";
 
 export async function POST(request: Request) {
     try {
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
             })
         }
 
-        const hashedPassword = bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({
             name,
