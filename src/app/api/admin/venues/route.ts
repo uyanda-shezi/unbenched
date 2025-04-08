@@ -9,7 +9,7 @@ interface RequestBody {
     address: string;
     latitude: number;
     longitude: number;
-    courtNames: string[];
+    courtNamesList: string[];
 }
 
 export async function POST(req: Request) {
@@ -24,31 +24,29 @@ export async function POST(req: Request) {
 
     try {
         await connectToDatabase();
-        const body: RequestBody = await req.json(); // Explicitly type the parsed body
+        const { name, address, latitude, longitude, courtNamesList } = await req.json();
 
-        const { name, address, latitude, longitude, courtNames } = body; // These will inherit types from RequestBody
-
-        if (!name || !address || typeof latitude !== 'number' || typeof longitude !== 'number' || !Array.isArray(courtNames)) {
+        if (!name || !address || typeof latitude !== 'number' || typeof longitude !== 'number' || !Array.isArray(courtNamesList)) {
+            console.log("Court Names: ", courtNamesList)
             return new NextResponse(JSON.stringify({ message: 'Invalid request body: Missing required fields or incorrect types' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
             });
         }
 
-        const newVenue = new Venue({ name, address, latitude, longitude, courts: []});
+        const newVenue = new Venue({ name, address, latitude, longitude});
         const savedVenue = await newVenue.save();
 
-        const createdCourtIds: string[] = [];
-        for (const courtName of courtNames) {
-            const newCourt = new Court({ venue: savedVenue._id, name: courtName });
-            const savedCourt = await newCourt.save();
-            savedVenue.courts.push(savedCourt._id);
-            createdCourtIds.push(savedCourt._id.toString());
-        }
+        const createdCourts = await Promise.all(
+            courtNamesList.map(courtName => new Court({ name: courtName, venue: savedVenue._id }).save())
+        );
 
-        await savedVenue.save(); // Save the venue with the array of court IDs
+        savedVenue.courts = createdCourts.map(court => court._id);
+        await savedVenue.save();
 
-        return new NextResponse(JSON.stringify({ venue: savedVenue, courtIds: createdCourtIds }), {
+        const populatedVenue = await Venue.findById(savedVenue._id).populate('courts', '_id name');
+
+        return new NextResponse(JSON.stringify({ venue: populatedVenue }), {
             status: 201,
             headers: { 'Content-Type': 'application/json' },
         });

@@ -48,9 +48,6 @@ const EditVenue = () => {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-semibold mb-4">Edit Venue</h1>
-            <p>Editing venue with ID: {id}</p>
-
             {venue && <EditVenueForm id={id} venue={venue} />}
         </div>
     );
