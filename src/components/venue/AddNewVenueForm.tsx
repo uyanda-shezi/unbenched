@@ -33,9 +33,7 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
         e.preventDefault();
         setSubmissionError(null);
 
-        const courtNames = courtNamesInput.split(',').map((name) => name.trim()).filter(name => name !== '');
-
-        if (!name || !address || latitude === '' || longitude === '' || isNaN(Number(latitude)) || isNaN(Number(longitude)) || courtNames.length === 0) {
+        if (!name || !address || latitude === '' || longitude === '' || isNaN(Number(latitude)) || isNaN(Number(longitude)) || courtNamesList.length === 0) {
             setSubmissionError('Please fill in all fields and provide at least one court name.');
             return;
         }
@@ -46,7 +44,7 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, address, latitude: Number(latitude), longitude: Number(longitude), courtNames }),
+                body: JSON.stringify({ name, address, latitude: Number(latitude), longitude: Number(longitude), courtNamesList }),
             });
 
             if (!response.ok) {
