@@ -15,9 +15,11 @@ export interface User {
     _id?: string;
     name: string;
     email: string;
+    role: string;
     image?: string;
     skillLevel: SkillLevel;
-    timeStamp: string;
+    createdAt: string;
+    updatedAt: string;
     gamesOrganized?: string[];
     gamesJoined?: string[];
 }

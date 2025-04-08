@@ -15,7 +15,7 @@ interface UpdateRequestBody {
     // we'll focus on venue details for now. Court updates could be a separate endpoint.
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params:  Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.role || session.user.role !== 'admin') {
@@ -25,8 +25,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         });
     }
 
-    const resolvedParams = await params;
-    const { id } = resolvedParams;
+    const { id } = (await context.params);
 
     if(!isValidObjectId(id)){
         return new NextResponse(JSON.stringify({ message: 'Invalid Venue ID' }), {
@@ -58,9 +57,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, context: { params:  Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
-    const venueId = params.id;
+    const venueId = (await context.params).id;
 
     if (!session?.user?.role || session.user.role !== 'admin') {
         return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
@@ -102,9 +101,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params:  Promise<{ id: string }>}) {
     const session = await getServerSession(authOptions);
-    const venueId = params.id;
+    const venueId = (await context.params).id;
 
     if (!session?.user?.role || session.user.role !== 'admin') {
         return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
