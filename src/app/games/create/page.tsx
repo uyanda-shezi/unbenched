@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import GameCreateForm from "@/components/GameCreateForm";
+import GameCreateForm from "@/components/game/GameCreateForm";
 
 export const metadata: Metadata = {
     title: 'Create match',

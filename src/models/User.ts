@@ -1,15 +1,16 @@
-import  mongoose, { Schema, model } from  "mongoose";
+import  mongoose, { Schema } from  "mongoose";
+import { IGame } from "./Game";
 
 
-export interface IUser {
+export interface IUser extends Document{
     _id: mongoose.Types.ObjectId;
     name: string;
     email: string;
     password:string;
     role: string;
     image?: string;
-    gamesOrganized: mongoose.Types.ObjectId[];
-    gamesJoined: mongoose.Types.ObjectId[];
+    gamesOrganized: mongoose.Types.ObjectId[] | IGame[];
+    gamesJoined: mongoose.Types.ObjectId[] | IGame[];
     skillLevel: 'beginner' | 'intermediate' | 'advanced';
     createdAt: Date;
     updatedAt: Date;
@@ -33,8 +34,8 @@ const UserSchema: Schema = new Schema(
         password: {type:String, required: true},
         role: {type:String, default: 'user'},
         image: { type: String},
-        gamesOrganized: { type: Schema.Types.ObjectId, ref: 'Game' },
-        gamesJoined: { type: Schema.Types.ObjectId, ref: 'Game' },
+        gamesOrganized: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
+        gamesJoined: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
         skillLevel: {
             type: String,
             enum: ['beginner', 'intermediate', 'advanced'],
