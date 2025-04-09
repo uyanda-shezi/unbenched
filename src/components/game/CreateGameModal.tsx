@@ -13,7 +13,6 @@ interface CreateGameModalProps {
 const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreated }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [venue, setVenue] = useState<string>('');
     const [dateTime, setDateTime] = useState('');
     const [maxPlayers, setMaxPlayers] = useState<number | ''>(10);
     const [price, setPrice] = useState<number | ''>(0);
@@ -52,7 +51,6 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
                         throw new Error(errorData?.message || 'Failed to fetch venue details');
                     }
                     const data: Venue = await response.json(); // Type the response as Venue
-                    console.log(data.courts)
                     setCourts(data.courts || []);
                 } catch (err: any) {
                     setError(err.message);
@@ -69,7 +67,6 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
 
     const handleVenueChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newValue = e.target.value;
-        console.log('Selected Venue ID:', newValue);
         setSelectedVenueId(newValue);
     };
 
@@ -81,15 +78,6 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
             setError('You must be signed in to create a game.');
             return;
         }
-
-        // console.log("[Title]: ", title)
-        // console.log("[Description]: ", description)
-        // console.log("[Venue]: ", selectedVenueId);
-        // console.log("[Court]: ", selectedCourtId);
-        // console.log("[DateTime]: ", dateTime)
-        // console.log("[MaxPlayers]: ", maxPlayers)
-        // console.log("[Price]: ", price);
-        // console.log("[OrganizerId]: ", session.user.id)
 
         try {
             const response = await fetch('/api/games/create', {

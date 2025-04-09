@@ -4,12 +4,14 @@ import { Game } from '@/types/Game';
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import CreateGameModal from '@/components/game/CreateGameModal';
+import Link from 'next/link';
 
 const GamesPage = () => {
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCreateGameModal, setShowCreateGameModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const { data: session } = useSession(); // Get the session
 
     useEffect(() => {
@@ -56,7 +58,10 @@ const GamesPage = () => {
     const handleGameCreated = (newGame: Game) => {
         setGames([...games, newGame]);
         setShowCreateGameModal(false);
-        // Optionally, show a success message
+        setSuccessMessage('Game created successfully!'); // Set success message
+        setTimeout(() => {
+            setSuccessMessage(null); // Clear message after a delay
+        }, 3000); // 3 seconds
     };
 
     return (
@@ -69,15 +74,26 @@ const GamesPage = () => {
                 Create New Game
             </button>
 
+            {successMessage && (
+                <div className="bg-green-200 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Success!</strong>
+                    <span className="block sm:inline ml-2">{successMessage}</span>
+                </div>
+            )}
+
             {games.length > 0 ? (
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {games.map((game) => (
                         <li key={game._id} className="bg-white shadow-md rounded-md p-4">
-                            <h3 className="font-semibold">{game.venue?.name}</h3>
-                            <p>Date: {new Date(game.dateTime).toLocaleDateString()}</p>
-                            <p>Time: {new Date(game.dateTime).toLocaleTimeString()}</p>
-                            <p>Spots: {game.currentPlayers?.length}/{game.maxPlayers}</p>
-                            {/* Add more details and an action button later */}
+                                <Link href={`/games/${game._id}`} className="block hover:bg-gray-100 p-2 rounded">
+                                <h2 className="font-semibold">{game.title}</h2>
+                                <p className="text-gray-600">{game.venue?.name}</p>
+                                <p className="text-sm text-gray-500">{new Date(game.dateTime).toLocaleString()}</p>
+                                {/* You can display other relevant info here */}
+                                <span className="inline-block bg-blue-100 text-blue-800 py-1 px-2 rounded-full text-xs font-semibold mt-2">
+                                    {game.maxPlayers - (game.currentPlayers?.length || 0)} spots open
+                                </span>
+                            </Link>
                         </li>
                     ))}
                 </ul>

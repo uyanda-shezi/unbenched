@@ -14,8 +14,6 @@ interface EditVenueFormProps {
 const EditVenueForm: React.FC<EditVenueFormProps> = ({id, venue}) => {
     const [name, setName] = useState(venue.name);
     const [address, setAddress] = useState(venue.address);
-    const [latitude, setLatitude] = useState<number | ''>(venue.latitude);
-    const [longitude, setLongitude] = useState<number | ''>(venue.longitude);
     const [currentCourtName, setCurrentCourtName] = useState('');
     const [courtNamesList, setCourtNamesList] = useState<Court[]>(venue.courts); // Initialize with existing courts
     const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -42,7 +40,7 @@ const EditVenueForm: React.FC<EditVenueFormProps> = ({id, venue}) => {
     const handleConfirmSubmit = async () => {
         setShowConfirmation(false); // Hide confirmation
 
-        if (!name || !address || latitude === '' || longitude === '' || isNaN(Number(latitude)) || isNaN(Number(longitude)) || courtNamesList.length === 0) {
+        if (!name || !address || courtNamesList.length === 0) {
             setSubmissionError('Please fill in all fields and provide at least one court name.');
             return;
         }
@@ -50,8 +48,6 @@ const EditVenueForm: React.FC<EditVenueFormProps> = ({id, venue}) => {
         const updatedVenueData = {
             name,
             address,
-            latitude: Number(latitude),
-            longitude: Number(longitude),
             courts: courtNamesList.map(court => ({ _id: court._id || undefined, name: court.name })),
         };
 
@@ -102,14 +98,6 @@ const EditVenueForm: React.FC<EditVenueFormProps> = ({id, venue}) => {
                     <label htmlFor="address" className="block text-gray-700 text-sm font-bold mb-2">Address:</label>
                     <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                 </div>
-                <div>
-                    <label htmlFor="latitude" className="block text-gray-700 text-sm font-bold mb-2">Latitude:</label>
-                    <input type="number" id="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value === '' ? '' : Number(e.target.value))} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                </div>
-                <div>
-                    <label htmlFor="longitude" className="block text-gray-700 text-sm font-bold mb-2">Longitude:</label>
-                    <input type="number" id="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value === '' ? '' : Number(e.target.value))} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                </div>
 
                 <div>
                     <label htmlFor="currentCourtName" className="block text-gray-700 text-sm font-bold mb-2">Add New Court:</label>
@@ -148,8 +136,6 @@ const EditVenueForm: React.FC<EditVenueFormProps> = ({id, venue}) => {
                         <ul className="list-disc pl-5 mb-4">
                             <li><strong>Name:</strong> {name}</li>
                             <li><strong>Address:</strong> {address}</li>
-                            <li><strong>Latitude:</strong> {latitude}</li>
-                            <li><strong>Longitude:</strong> {longitude}</li>
                             <li><strong>Courts:</strong>
                                 {courtNamesList.length > 0 ? (
                                     <ul>

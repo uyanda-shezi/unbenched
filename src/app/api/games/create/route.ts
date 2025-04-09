@@ -5,7 +5,7 @@ import connectToDatabase from "@/lib/db";
 import Game from '@/models/Game';
 import User from '@/models/User';
 import Venue from "@/models/Venue";
-import { Court } from "@/models/Venue";
+import Court from "@/models/Court";
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
@@ -17,15 +17,6 @@ export async function POST(req: Request) {
     try {
         await connectToDatabase();
         const { title, description, selectedVenueId, selectedCourtId, dateTime, maxPlayers, price, organizerId } = await req.json();
-
-        console.log("[Title]: ", title)
-        console.log("[Description]: ", description)
-        console.log("[Venue]: ", selectedVenueId);
-        console.log("[Court]: ", selectedCourtId);
-        console.log("[DateTime]: ", dateTime)
-        console.log("[MaxPlayers]: ", maxPlayers)
-        console.log("[Price]: ", price);
-        console.log("[OrganizerId]: ", session.user.id)
 
         if (!title || !selectedVenueId || !selectedCourtId || !dateTime || !maxPlayers || !organizerId) {
             return new NextResponse(JSON.stringify({ message: 'Please provide all required fields.' }), { status: 400 });
