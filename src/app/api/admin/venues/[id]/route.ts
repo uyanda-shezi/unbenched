@@ -3,16 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/db';
 import Venue from '@/models/Venue';
-import {Court} from '@/models/Court';
+import Court from '@/models/Court';
 import { isValidObjectId } from 'mongoose';
 
+// TODO: Check adding a new court to a venue
 interface UpdateRequestBody {
     name?: string;
     address?: string;
-    latitude?: number;
-    longitude?: number;
-    // You might allow updating court names here as well, but for simplicity,
-    // we'll focus on venue details for now. Court updates could be a separate endpoint.
+    courts?: string[];
 }
 
 export async function GET(req: Request, context: { params:  Promise<{ id: string }> }) {

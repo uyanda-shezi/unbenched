@@ -11,7 +11,7 @@ const UserManagementPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<string | null>(null); // ID of the user to delete
+    const [userToDelete, setUserToDelete] = useState<string | null>(null);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import GameSearch from "@/components/GameSearch";
+import GameSearch from "@/components/game/GameSearch";
 
 export default function Home() {
   return (

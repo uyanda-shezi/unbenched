@@ -74,7 +74,6 @@ export const authOptions: {
         async jwt({ token, user, account, profile, trigger, isNewUser, session }) {
             if (user) {
                 token.sub = (user as IUser)._id.toString(); // Explicitly cast to IUser here
-                console.log("token", token.sub)
             }
             return token;
         },

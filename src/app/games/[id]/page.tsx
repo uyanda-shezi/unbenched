@@ -1,133 +1,140 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import connectToDatabase from "@/lib/db";
-import Game from "@/models/Game";
-import { ObjectId } from 'mongodb';
-import { isValidObjectId } from 'mongoose';
+'use client';
 
-interface GameDetailPageProps {
-    params: {
-        id: string;
-    }
-}
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { Game } from '@/types/Game';
+import { useSession } from 'next-auth/react';
 
-interface GameOrganizer {
-    _id: string;
-    name: string;
-    email?: string;
-}
+const GameDetailPage = () => {
+    const [game, setGame] = useState<Game | null>(null);
+    const [loadingGame, setLoadingGame] = useState(true);
+    const [errorGame, setErrorGame] = useState<string | null>(null);
+    const { id } = useParams();
+    const { data: session, status: sessionStatus } = useSession();
+    const [requestSent, setRequestSent] = useState(false);
+    const [joiningLoading, setJoiningLoading] = useState(false);
+    const [joiningError, setJoiningError] = useState<string | null>(null);
 
-interface GamePlayer {
-    _id: string;
-    name: string;
-}
+    useEffect(() => {
+        const fetchGameDetails = async () => {
+            if (!id) return;
+            try {
+                const response = await fetch(`/api/games/${id}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData?.message || 'Failed to fetch game details');
+                }
+                const data = await response.json();
+                setGame(data);
+                setLoadingGame(false);
+            } catch (err: any) {
+                setErrorGame(err.message);
+                setLoadingGame(false);
+            }
+        };
 
-interface GameData {
-    _id: string;
-    title: string;
-    description: string;
-    location: {
-        address: string;
+        fetchGameDetails();
+    }, [id]);
+
+    const handleRequestJoin = async () => {
+        if (sessionStatus === 'unauthenticated') {
+            alert('You must be signed in to request to join.');
+            return;
+        }
+
+        if (!session?.user?.id || !game?._id) return;
+
+        setJoiningLoading(true);
+        setJoiningError(null);
+
+        try {
+            console.log(game._id);
+            const response = await fetch(`/api/games/${game._id}/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId: session.user.id }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData?.message || 'Failed to request to join');
+            }
+
+            setRequestSent(true);
+            alert('Your request to join has been sent.');
+            // Optionally, update the game state to reflect the request
+        } catch (err: any) {
+            setJoiningError(err.message);
+        } finally {
+            setJoiningLoading(false);
+        }
     };
-    dateTime: string;
-    skillLevel: string;
-    price: number;
-    maxPlayers: number;
-    organizer: GameOrganizer;
-    currentPlayers: GamePlayer[];
-}
 
-async function getGameData(id: string, fullDetails: boolean = false){
-    // Check if ID is valid before attempting to query
-    if (!isValidObjectId(id)) {
-        console.log(`Invalid ObjectId format: ${id}`);
-        return null;
+    if (loadingGame) {
+        return <div>Loading game details...</div>;
     }
 
-    await connectToDatabase();
-
-    try {
-        const populateOptions = fullDetails ? [
-            {path: 'organizer', select: 'name email'},
-            {path: 'currentPlayers', select: 'name'},
-        ] : [{path: 'organizer', select: 'name'}];
-
-        const game = await Game.findById(id).populate(populateOptions);
-        return game;
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Error fetching games";
-        console.error(errorMessage);
-        return null;
+    if (errorGame) {
+        return <div className="text-red-500">Error: {errorGame}</div>;
     }
-}
 
-export async function generateMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
-    const game = await getGameData(params.id);
     if (!game) {
-        return {title: 'Game not found'};
-    };
-    return {
-        title: `${game.title} | Match Finder`,
-        description: game.description,
-    }
-}
-
-export default async function GameDetailPage({ params }: GameDetailPageProps) {
-    const game = await getGameData(params.id, true);
-
-    if (!game) {
-        notFound();
+        return <div>Game not found.</div>;
     }
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString( [], {hour: '2-digit', minute: '2-digit'} )
-    };
+    const canRequestToJoin = session?.user?.id &&
+        !game.currentPlayers?.some((player: any) => player._id === session?.user?.id) &&
+        !game.joinRequests?.some((request: any) => request._id === session?.user?.id);
 
     return (
-        <div className="container mx-auto py-8">
-            <div className="max-w-4xl mx-auto bg-white rounded shadow-md p-6">
-                <h1 className="text-3xl font-bold mb-2">{game.title}</h1>
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-semibold mb-4">{game.title}</h1>
+            <p className="mb-2"><strong>Description:</strong> {game.description}</p>
+            <p className="mb-2"><strong>Venue:</strong> {game.venue?.name}, {game.venue?.address}</p>
+            <p className="mb-2"><strong>Date and Time:</strong> {new Date(game.dateTime).toLocaleString()}</p>
+            <p className="mb-2"><strong>Organizer:</strong> {game.organizer?.name}</p>
+            <p className="mb-2"><strong>Court:</strong> {game?.court?.name}</p>
+            <p className="mb-2"><strong>Players:</strong> {game.currentPlayers?.length}/{game.maxPlayers}</p>
+            {game.currentPlayers?.length > 0 && (
+                <div className="mb-2">
+                    <strong>Current Players:</strong>
+                    <ul>
+                        {game.currentPlayers.map((player: any) => (
+                            <li key={player._id}>{player.name}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            <p className="mb-2"><strong>Price:</strong> {game.price > 0 ? `R${game.price.toFixed(2)}` : 'Free'}</p>
 
-                <div className="mb-6">
-                    <p className="text-gray-600">Organized by: {game.organizer.name}</p>
-                    <p className="text-gray-600">Location: {game.location.address}</p>
-                    <p className="text-gray-600">When: {formatDate(game.dateTime)}</p>
-                </div>
-
-                <div className="bg-gray-100 p-4 rounded mb-6">
-                    <h2 className="text-xl font-bold mb-2">About this game</h2>
-                    <p>{game.description}</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gray-100 p-4 rounded">
-                        <h3 className="font-bold mb-1">Skill Level</h3>
-                        <p className="capitalize">{game.skillLevel}</p>
-                    </div>
-                    <div className="bg-gray-100 p-4 rounded">
-                        <h3 className="font-bold mb-1">Price</h3>
-                        <p>${game.price.toFixed(2)}</p>
-                    </div>
-                    <div className="bg-gray-100 p-4 rounded">
-                        <h3 className="font-bold mb-1">Players</h3>
-                        <p>{game.currentPlayers.length}/{game.maxPlayers}</p>
-                    </div>
-                </div>
-
-                <div className="mb-6">
-                    <h2 className="text-xl font-bold mb-2">Current Players</h2>
-                    {game.currentPlayers.length > 0 ? (
-                        <ul className="bg-gray-100 p-4 rounded">
-                            {game.currentPlayers.map((player: GamePlayer) => (<li key={player._id}>{player.name}</li>))}
-                        </ul>) : 
-                        (<p className="bg-gray-100 p-4 rounded">No players have joined yet</p>)}
-                </div>
-                
-                <div className="flex justify-center">
-                    <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Request to Join</button>
-                </div>
-            </div>
+            {sessionStatus === 'loading' ? (
+                <p className="mt-4 text-gray-600">Checking authentication...</p>
+            ) : sessionStatus === 'unauthenticated' ? (
+                <p className="mt-4 text-gray-600">Sign in to request to join this game.</p>
+            ) : (
+                canRequestToJoin ? (
+                    <button
+                        onClick={handleRequestJoin}
+                        disabled={requestSent || joiningLoading}
+                        className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 ${requestSent || joiningLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {joiningLoading ? 'Sending Request...' : requestSent ? 'Request Sent' : 'Request to Join'}
+                    </button>
+                ) : (
+                    <p className="mt-4 text-gray-600">
+                        {game.currentPlayers?.some((player: any) => player._id === session?.user?.id)
+                            ? 'You are already in this game.'
+                            : game.joinRequests?.some((request: any) => request._id === session?.user?.id)
+                                ? 'You have already requested to join this game.'
+                                : 'You cannot join this game.'}
+                    </p>
+                )
+            )}
+            {joiningError && <p className="mt-2 text-red-500">{joiningError}</p>}
         </div>
     );
-}
+};
+
+export default GameDetailPage;

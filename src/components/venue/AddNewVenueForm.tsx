@@ -11,8 +11,8 @@ interface AddNewVenueFormProps {
 const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormClose }) => {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
-    const [latitude, setLatitude] = useState<number | ''>('');
-    const [longitude, setLongitude] = useState<number | ''>('');
+    // const [latitude, setLatitude] = useState<number | ''>('');
+    // const [longitude, setLongitude] = useState<number | ''>('');
     const [courtNamesInput, setCourtNamesInput] = useState('');
     const [currentCourtName, setCurrentCourtName] = useState('');
     const [courtNamesList, setCourtNamesList] = useState<string[]>([]); // List of courts to be added
@@ -33,7 +33,7 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
         e.preventDefault();
         setSubmissionError(null);
 
-        if (!name || !address || latitude === '' || longitude === '' || isNaN(Number(latitude)) || isNaN(Number(longitude)) || courtNamesList.length === 0) {
+        if (!name || !address || courtNamesList.length === 0) {
             setSubmissionError('Please fill in all fields and provide at least one court name.');
             return;
         }
@@ -44,7 +44,7 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, address, latitude: Number(latitude), longitude: Number(longitude), courtNamesList }),
+                body: JSON.stringify({ name, address, courtNamesList }),
             });
 
             if (!response.ok) {
@@ -57,8 +57,6 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
             onFormClose();
             setName('');
             setAddress('');
-            setLatitude('');
-            setLongitude('');
             setCourtNamesInput('');
         } catch (err: any) {
             setSubmissionError(err.message);
@@ -77,14 +75,6 @@ const AddNewVenueForm: React.FC<AddNewVenueFormProps> = ({ onVenueAdded, onFormC
                 <div>
                     <label htmlFor="address" className="block text-gray-700 text-sm font-bold mb-2">Address:</label>
                     <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                </div>
-                <div>
-                    <label htmlFor="latitude" className="block text-gray-700 text-sm font-bold mb-2">Latitude:</label>
-                    <input type="number" id="latitude" value={latitude} onChange={(e) => setLatitude(e.target.value === '' ? '' : Number(e.target.value))} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                </div>
-                <div>
-                    <label htmlFor="longitude" className="block text-gray-700 text-sm font-bold mb-2">Longitude:</label>
-                    <input type="number" id="longitude" value={longitude} onChange={(e) => setLongitude(e.target.value === '' ? '' : Number(e.target.value))} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                 </div>
                 <div>
                     <label htmlFor="currentCourtName" className="block text-gray-700 text-sm font-bold mb-2">Court Name:</label>
