@@ -15,6 +15,8 @@ export interface IGame extends Document {
     currentPlayers: mongoose.Types.ObjectId[] | IUser[];
     joinRequests: mongoose.Types.ObjectId[] | IUser[];
     price: number;
+    duration: number;
+    status: 'open' | 'closed' | 'cancelled' | 'completed';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -32,6 +34,8 @@ const GameSchema: Schema = new Schema(
         currentPlayers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
         joinRequests: [{ type: Schema.Types.ObjectId, ref: 'User' }],
         price: { type: Number, default: 0 },
+        duration: { type: Number, min: 1, default: 60 },
+        status: { type: String, enum: ['open', 'closed', 'cancelled', 'completed'], default: 'open' },
     },
     { timestamps: true }
 );

@@ -14,6 +14,7 @@ export interface Game{
         currentPlayers: User[];
         joinRequests: User[];
         price: number;
+        status: 'open' | 'closed' | 'cancelled' | 'completed';
         startDateTime: Date;
         duration: number
         createdAt: Date;
