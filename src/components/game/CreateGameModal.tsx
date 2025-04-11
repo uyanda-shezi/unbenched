@@ -20,6 +20,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
     const [selectedVenueId, setSelectedVenueId] = useState<string>('');
     const [courts, setCourts] = useState<Court[]>([]);
     const [selectedCourtId, setSelectedCourtId] = useState<string>('');
+    const [duration, setDuration] = useState<number | ''>(60);
     const [error, setError] = useState<string | null>(null);
     const { data: session } = useSession();
 
@@ -94,6 +95,7 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
                     maxPlayers: Number(maxPlayers),
                     price: Number(price),
                     organizerId: session.user.id, // Send the organizer's ID
+                    duration: Number(duration),
                 }),
             });
 
@@ -147,6 +149,18 @@ const CreateGameModal: React.FC<CreateGameModalProps> = ({ onClose, onGameCreate
                     <div>
                         <label htmlFor="dateTime" className="block text-gray-700 text-sm font-bold mb-2">Date and Time:</label>
                         <input type="datetime-local" id="dateTime" value={dateTime} onChange={(e) => setDateTime(e.target.value)} className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required />
+                    </div>
+                    <div>
+                        <label htmlFor="duration" className="block text-gray-700 text-sm font-bold mb-2">Duration (minutes):</label>
+                        <input
+                            type="number"
+                            id="duration"
+                            value={duration}
+                            onChange={(e) => setDuration(e.target.value === '' ? '' : parseInt(e.target.value))}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            min="1"
+                            required
+                        />
                     </div>
                     <div>
                         <label htmlFor="maxPlayers" className="block text-gray-700 text-sm font-bold mb-2">Max Players:</label>

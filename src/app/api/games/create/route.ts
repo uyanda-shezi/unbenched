@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     try {
         await connectToDatabase();
-        const { title, description, selectedVenueId, selectedCourtId, dateTime, maxPlayers, price, organizerId } = await req.json();
+        const { title, description, selectedVenueId, selectedCourtId, dateTime, maxPlayers, price, organizerId, duration } = await req.json();
 
         if (!title || !selectedVenueId || !selectedCourtId || !dateTime || !maxPlayers || !organizerId) {
             return new NextResponse(JSON.stringify({ message: 'Please provide all required fields.' }), { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
             venue,
             court,
             dateTime: new Date(dateTime),
+            duration,
             organizer: organizerId,
             maxPlayers: parseInt(maxPlayers, 10),
             price: parseFloat(price),

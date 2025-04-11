@@ -12,12 +12,13 @@ const GamesPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [showCreateGameModal, setShowCreateGameModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [showSignInPrompt, setShowSignInPrompt] = useState(false);
     const { data: session } = useSession(); // Get the session
 
     useEffect(() => {
         const fetchGames = async () => {
             try {
-                const response = await fetch('/api/games'); // We'll create this API endpoint
+                const response = await fetch('/api/games');
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData?.message || 'Failed to fetch games');
@@ -46,8 +47,7 @@ const GamesPage = () => {
         if (session?.user) {
             setShowCreateGameModal(true);
         } else {
-            alert('You must be signed in to create a game.'); // Basic authentication check
-            // You might want to redirect to the sign-in page instead of an alert
+            setShowSignInPrompt(true); // Show the sign-in prompt
         }
     };
 
@@ -73,6 +73,15 @@ const GamesPage = () => {
             >
                 Create New Game
             </button>
+
+            {showSignInPrompt && (
+                <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    You need to be <Link href="/signin" className="font-bold hover:underline">signed in</Link> to create a game.
+                    <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
+                        <svg onClick={() => setShowSignInPrompt(false)} className="fill-current h-6 w-6 text-yellow-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path fillRule="evenodd" d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.546 6.354 14.849a1.2 1.2 0 0 1-1.697-1.697L8.303 10 5.606 6.354a1.2 1.2 0 0 1 1.697-1.697L10 8.303l3.646-3.646a1.2 1.2 0 0 1 1.697 1.697L11.697 10l3.646 3.649a1.2 1.2 0 0 1 0 1.697z" clipRule="evenodd"/></svg>
+                    </span>
+                </div>
+            )}
 
             {successMessage && (
                 <div className="bg-green-200 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
