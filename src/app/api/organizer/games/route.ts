@@ -24,7 +24,16 @@ export async function GET(req: Request) {
             dateTime: { $gt: now },
             status: 'open' // Check if dateTime is in the future
         })
-            .populate('venue', 'name'); // Populate venue name for better context
+            .populate('venue')
+            .populate('court')
+            .populate('organizer', 'name _id') // Populate organizer details
+            .populate({
+                path: 'joinRequests',
+                model: 'User',
+                select: '_id name', // Fetch _id and name of requesting users
+            })
+            .populate('currentPlayers', 'name _id') // Populate current players
+            .sort({ dateTime: 'asc' });
 
         return NextResponse.json(organizerGames);
     } catch (error: any) {

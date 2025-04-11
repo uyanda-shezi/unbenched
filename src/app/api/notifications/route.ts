@@ -2,37 +2,37 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectToDatabase from "@/lib/db";
-import Game from '@/models/Game';
+import Notification from '@/models/Notification';
+import User from '@/models/User'; // Import User model (though might not be strictly needed if populated)
+import Game from '@/models/Game';   // Import Game model (though might not be strictly needed if populated)
 
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-        return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-        });
+        return new NextResponse(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
     }
-
-    const organizerId = session.user.id;
 
     try {
         await connectToDatabase();
 
-        const notifications = await Game.find({
-            organizer: organizerId,
-            joinRequests: { $not: { $size: 0 } } // Find games with at least one join request
-        })
-            .populate('venue', 'name')
-            .populate('court', 'name') // Populate venue name
-            .populate('joinRequests', '_id name'); // Populate details of users who requested to join
+        const userId = session.user.id;
+
+        const notifications = await Notification.find({ recipient: userId, isRead: false })
+            .populate({
+                path: 'sender',
+                select: 'name _id', // Only fetch name and _id of the sender
+            })
+            .populate({
+                path: 'game',
+                select: 'title _id', // Only fetch title and _id of the game
+            })
+            .sort({ createdAt: 'desc' });
 
         return NextResponse.json(notifications);
+
     } catch (error: any) {
-        console.error("Error fetching join requests:", error);
-        return new NextResponse(
-            JSON.stringify({ message: "Failed to fetch join requests" }),
-            { status: 500, headers: { "Content-Type": "application/json" } }
-        );
+        console.error("Error fetching notifications:", error);
+        return new NextResponse(JSON.stringify({ message: "Failed to fetch notifications" }), { status: 500 });
     }
 }

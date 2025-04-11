@@ -4,13 +4,15 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectToDatabase from "@/lib/db";
 import Game from '@/models/Game';
 import mongoose from "mongoose";
+import Notification from "@/models/Notification";
+import { NotificationType } from "@/enums/NotificationType";
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { gameId: string; userId: string } }
+    context: { params:  Promise<{ gameId: string; userId: string }> }
 ) {
     const session = await getServerSession(authOptions);
-    const { gameId, userId } = params;
+    const { gameId, userId } = await context.params;
 
     if (!session?.user?.id) {
         return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
@@ -52,6 +54,15 @@ export async function PATCH(
         game.currentPlayers.push(userId);
 
         await game.save();
+        
+        await Notification.create({
+            recipient: userId,
+            sender: session.user.id,
+            game: gameId,
+            message: `Has approved your request to join "${game.title}"`,
+            isRead: false,
+            type: NotificationType.REQUEST_APPROVED,
+        });
 
         return new NextResponse(JSON.stringify({ message: "Request approved" }), {
             status: 200,
