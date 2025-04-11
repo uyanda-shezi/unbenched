@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectToDatabase from "@/lib/db";
-import Game from '@/models/Game';
+import Game, { IGame } from '@/models/Game';
 import Venue from "@/models/Venue"; // Make sure Venue model is imported
 import User from "@/models/User";   // Make sure User model is imported
 import { ObjectId } from 'mongodb'; // Or mongoose.Types.ObjectId if using Mongoose
@@ -50,11 +50,11 @@ export async function PUT(req: Request, context: { params:  Promise<{ gameId: st
         // Convert local time to UTC by subtracting the timezone offset
         const utcTime = new Date(localTime.getTime() - localTime.getTimezoneOffset() * 60000);
 
-        const updateData: Partial<Game> = {
+        const updateData: Partial<IGame> = {
             title,
             dateTime: utcTime, // Store as UTC
             venue: venue ? new ObjectId(venue) : null,
-            court,
+            court: court ? new ObjectId(court) : null,
         };
 
         const updatedGame = await Game.findByIdAndUpdate(gameId, updateData, { new: true });
