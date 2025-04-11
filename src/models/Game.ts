@@ -7,8 +7,8 @@ import { IUser } from "./User";
 export interface IGame extends Document {
     title: string;
     description: string;
-    venue: Venue;
-    court: Court;
+    venue: Venue | mongoose.Types.ObjectId | null;
+    court: Court | mongoose.Types.ObjectId | null;
     dateTime: Date;
     organizer: mongoose.Types.ObjectId;
     maxPlayers: number;
