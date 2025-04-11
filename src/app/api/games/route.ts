@@ -10,7 +10,8 @@ export async function GET(req: Request) {
 
         const games = await Game.find({
             $expr: { $gt: ['$maxPlayers', { $size: '$currentPlayers' }] }, // Check if maxPlayers > size of currentPlayers array
-            dateTime: { $gt: now } // Check if dateTime is in the future
+            dateTime: { $gt: now },
+            status: 'open' // Check if dateTime is in the future
         })
             .populate('venue', 'name address')
             .populate('court', 'name')
