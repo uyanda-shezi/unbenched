@@ -1,13 +1,14 @@
-import Image from "next/image";
-import GameSearch from "@/components/game/GameSearch";
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <main className="min-h-screen p-24">
-      <h1 className="text-4x1 font-bold text-center mb-8">
-        UNBENCHED
-      </h1>
-      <GameSearch/>
-    </main>
-  );
+    const router = useRouter();
+
+    useEffect(() => {
+        router.push('/games');
+    }, [router]);
+
+    return null; // simple loading indicator?
 }
